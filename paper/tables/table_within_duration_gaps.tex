@@ -1,0 +1,30 @@
+\begin{table}[htbp]
+  \centering
+  \caption{Within-Duration Posted Price Differences in Unisex Salons}
+  \label{tab:within_duration_gaps}
+  \footnotesize
+\begin{tabular}{lcccc}
+\hline
+Comparison & \makecell{Salon $\times$ band\\FE gap} & \makecell{Salon $\times$ exact-\\duration FE gap} & \makecell{Band sample\\listings/salons} & \makecell{Exact-FE sample\\listings/salons} \\
+\hline
+\multicolumn{5}{l}{\textit{Panel A: Same salon and exact listed duration}} \\
+All overlap cells & -- & 5.3$^{***}$ (0.2) & -- & 5941/2309 \\
+\hline
+\multicolumn{5}{l}{\textit{Panel B: Same salon and duration band}} \\
+$\leq$30 minutes & 3.3$^{***}$ (0.2) & 3.6$^{***}$ (0.2) & 6231/2163 & 4289/1672 \\
+31--45 minutes & 6.6$^{***}$ (0.5) & 7.1$^{***}$ (0.6) & 1347/554 & 811/344 \\
+46--60 minutes & 11.0$^{***}$ (0.7) & 11.9$^{***}$ (0.8) & 1095/453 & 790/330 \\
+61--75 minutes & 9.9$^{***}$ (2.5) & 10.3$^{***}$ (3.3) & 55/25 & 31/13 \\
+76--119 minutes & 12.1$^{***}$ (4.2) & 5.4$^{*}$ (3.0) & 31/15 & 20/10 \\
+\hline
+\end{tabular}
+
+\begin{minipage}{0.94\linewidth}
+\footnotesize
+\textit{Notes:} Adult unisex listings.
+Panel A uses salon-duration cells with both genders and salon-by-exact-duration fixed effects.
+Panel B uses a separate, broader support rule: the band-FE column includes all salon-duration-band cells containing both genders and is not restricted to Panel A exact-overlap salons.
+The exact-duration FE column uses only same-salon exact-duration cells within each band, so those counts sum to Panel A.
+Standard errors are clustered by salon; estimates are euros and descriptive.
+\end{minipage}
+\end{table}

@@ -81,7 +81,6 @@ headers = {
 
 
 def adults():
-    SNAPSHOTS_DIR.mkdir(parents=True, exist_ok=True)
     all_results = {"male": [], "female": []}
 
     for country in countries:
@@ -181,7 +180,6 @@ def adults():
 
 
 def kids():
-    SNAPSHOTS_DIR.mkdir(parents=True, exist_ok=True)
     all_results = []
     for country in countries:
         genders = ["boys", "girls"] if country in ["pt"] else ["boys"]

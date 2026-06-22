@@ -277,7 +277,6 @@ def main():
     script_dir = Path(__file__).parent
     data_dir = script_dir.parent / "data"
     snapshots_dir = data_dir / "snapshots"
-    snapshots_dir.mkdir(parents=True, exist_ok=True)
     
     # Read the dataset
     csv_file = snapshots_dir / "treatwell_without_raw-all-2025-06-02.csv"

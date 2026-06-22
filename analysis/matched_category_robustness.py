@@ -1,27 +1,45 @@
 #!/usr/bin/env python3
-"""Build the matched-title robustness inputs used by the paper table workflow."""
+"""Build a matched-category adult robustness check from title-based matching.
+
+This script is additive to the existing paper table workflow. It:
+1. rebuilds the current adult baseline sample;
+2. enriches rows with raw JSON category metadata;
+3. constructs three nested matched-category samples;
+4. estimates the current salon-FE models on the primary exact-pair sample when feasible;
+5. writes diagnostics to ``data/derived`` and ``data/audits`` plus a LaTeX table to ``paper/tables/`` when the sample is large enough.
+"""
 
 from __future__ import annotations
 
 import json
+import math
 import re
 from collections import Counter
+from pathlib import Path
 
 import pandas as pd
 
 from generate_paper_tables import (
     ADULT_DATA,
     DATA_DIR,
+    PAPER_DIR,
     ModelResult,
     add_demeaned_columns,
     fit_clustered_fe,
+    fmt_coef,
+    fmt_int,
+    fmt_r2,
+    fmt_se,
     normalize,
     preprocess_adults,
     restrict_unisex_salons,
+    write_file,
 )
 
 
 RAW_ADULT_DATA = DATA_DIR / "snapshots" / "treatwell-all-2025-06-02.csv"
+TREATMENT_ID_ANALYSIS = DATA_DIR / "derived" / "treatment_ids_analysis.csv"
+TABLE_OUTPUT = PAPER_DIR / "tables" / "table_matched_category_robustness.tex"
 MODEL_SUMMARY_OUTPUT = DATA_DIR / "derived" / "matched_category_model_summary.json"
 
 MIN_PRIMARY_LISTINGS = 500
@@ -294,6 +312,18 @@ def enrich_adult_baseline(adults: pd.DataFrame) -> tuple[pd.DataFrame, dict[str,
         how="left",
         validate="one_to_one",
     )
+    if TREATMENT_ID_ANALYSIS.exists():
+        treatment_map = pd.read_csv(TREATMENT_ID_ANALYSIS, usecols=["treatmentCategoryId", "primary_cut_type"])
+        enriched = enriched.merge(
+            treatment_map,
+            left_on="primaryTreatmentCategoryId",
+            right_on="treatmentCategoryId",
+            how="left",
+        )
+        enriched = enriched.drop(columns=["treatmentCategoryId"], errors="ignore")
+    else:
+        enriched["primary_cut_type"] = None
+
     enriched["name_norm"] = enriched["simpleCutName"].map(normalize_title)
     enriched["name_stem"] = enriched["name_norm"].map(stem_text)
     enriched["name_stem"] = enriched["name_stem"].replace("", "__empty_stem__")
@@ -381,6 +411,78 @@ def primary_sample(sample_c: pd.DataFrame) -> pd.DataFrame:
     return add_cell_counts(sample)
 
 
+def sample_metrics(name: str, df: pd.DataFrame, matched: bool = False) -> dict[str, object]:
+    metrics = {
+        "sample": name,
+        "listings": int(len(df)),
+        "matched_cells": 0,
+        "exact_pairs": 0,
+        "salons": int(df["id"].nunique()) if not df.empty else 0,
+        "countries": int(df["country"].nunique()) if not df.empty else 0,
+        "male_mean_price": float(df.loc[df["female"] == 0, "price"].mean()) if not df.empty else math.nan,
+        "female_mean_price": float(df.loc[df["female"] == 1, "price"].mean()) if not df.empty else math.nan,
+        "male_mean_duration": float(df.loc[df["female"] == 0, "duration"].mean()) if not df.empty else math.nan,
+        "female_mean_duration": float(df.loc[df["female"] == 1, "duration"].mean()) if not df.empty else math.nan,
+    }
+    if matched and not df.empty:
+        cell_counts = df.groupby(["id", MATCH_KEY])["female"].agg(["size", "sum"]).reset_index()
+        cell_counts["male_count"] = cell_counts["size"] - cell_counts["sum"]
+        metrics["matched_cells"] = int(len(cell_counts))
+        metrics["exact_pairs"] = int(((cell_counts["sum"] == 1) & (cell_counts["male_count"] == 1)).sum())
+    return metrics
+
+
+def build_examples(enriched: pd.DataFrame, sample_a: pd.DataFrame, sample_b: pd.DataFrame, sample_c: pd.DataFrame, primary: pd.DataFrame) -> pd.DataFrame:
+    all_cells = (
+        enriched.groupby(["id", MATCH_KEY])
+        .apply(
+            lambda g: pd.Series(
+                {
+                    "male_titles": " | ".join(sorted(set(g.loc[g["female"] == 0, "simpleCutName"].astype(str)))),
+                    "female_titles": " | ".join(sorted(set(g.loc[g["female"] == 1, "simpleCutName"].astype(str)))),
+                    "male_prices": " | ".join(f"{value:.2f}" for value in sorted(g.loc[g["female"] == 0, "price"].tolist())),
+                    "female_prices": " | ".join(f"{value:.2f}" for value in sorted(g.loc[g["female"] == 1, "price"].tolist())),
+                    "male_durations": " | ".join(f"{value:.0f}" for value in sorted(g.loc[g["female"] == 0, "duration"].tolist())),
+                    "female_durations": " | ".join(f"{value:.0f}" for value in sorted(g.loc[g["female"] == 1, "duration"].tolist())),
+                    "male_count": int((g["female"] == 0).sum()),
+                    "female_count": int((g["female"] == 1).sum()),
+                    "bundle_flag": bool(g["noncomparable_bundle_flag"].any()),
+                    "length_short": bool(g["length_short"].any()),
+                    "length_medium": bool(g["length_medium"].any()),
+                    "length_long": bool(g["length_long"].any()),
+                    "state_wash": bool(g["state_wash"].any()),
+                    "state_dry": bool(g["state_dry"].any()),
+                    "state_wet": bool(g["state_wet"].any()),
+                    "type_machine": bool(g["type_machine"].any()),
+                    "type_clipper": bool(g["type_clipper"].any()),
+                }
+            )
+        )
+        .reset_index()
+    )
+    membership = all_cells.copy()
+    for label, df in [("in_sample_a", sample_a), ("in_sample_b", sample_b), ("in_sample_c", sample_c), ("in_primary", primary)]:
+        cells = df[["id", MATCH_KEY]].drop_duplicates().assign(**{label: True})
+        membership = membership.merge(cells, on=["id", MATCH_KEY], how="left")
+        membership[label] = membership[label].fillna(False)
+
+    def reason(row: pd.Series) -> str:
+        if not row["in_sample_a"]:
+            return "no matched male/female nongendered title cell"
+        if not row["in_sample_b"]:
+            return "not exact 1-to-1 matched pair"
+        if not row["in_sample_c"]:
+            return "generic haircut label only"
+        if not row["in_primary"]:
+            return "dropped before primary sample"
+        return "retained in primary sample"
+
+    membership["drop_reason"] = membership.apply(reason, axis=1)
+    membership["cell_size"] = membership["male_count"] + membership["female_count"]
+    membership = membership.sort_values(["in_primary", "in_sample_c", "cell_size"], ascending=[False, False, False])
+    return membership.head(250)
+
+
 def fit_matched_models(df: pd.DataFrame) -> tuple[ModelResult, ModelResult]:
     work = df.copy()
     work["fem_dur"] = work["female"] * work["duration"]
@@ -402,6 +504,51 @@ def fit_matched_models(df: pd.DataFrame) -> tuple[ModelResult, ModelResult]:
         },
     )
     return m1, m2
+
+
+def render_matched_table(models: list[ModelResult]) -> str:
+    rows = ["Duration (min)", "Female", "Duration $\\times$ Female"]
+    lines = [
+        "",
+        "\\begin{table}[htbp]",
+        "  \\centering",
+        "  \\caption{Matched-Category Robustness Check}",
+        "  \\label{tab:matched_category_robustness}",
+        "  \\small",
+        "",
+        "\\begin{tabular}{@{\\extracolsep{5pt}}lcc}",
+        "\\\\[-1.8ex]\\hline",
+        "\\hline \\\\[-1.8ex]",
+        "& \\multicolumn{2}{c}{\\textit{Dependent variable: price}} \\\\",
+        "\\cr \\cline{2-3}",
+        f"\\\\[-1.8ex] & \\multicolumn{{1}}{{c}}{{{models[0].label}}} & \\multicolumn{{1}}{{c}}{{{models[1].label}}}  \\\\",
+        "\\\\[-1.8ex] & (1) & (2) \\\\",
+        "\\hline \\\\[-1.8ex]",
+    ]
+    for row in rows:
+        lines.append(f" {row} & " + " & ".join(fmt_coef(model.coef(row), model.pvalue(row)) for model in models) + " \\\\")
+        lines.append("& " + " & ".join(fmt_se(model.se(row)) for model in models) + " \\\\")
+    lines.extend(
+        [
+            "\\hline \\\\[-1.8ex]",
+            " Salon Fixed Effects & Yes & Yes \\\\",
+            " Observations & " + " & ".join(fmt_int(model.nobs) for model in models) + " \\\\",
+            " Number of salons & " + " & ".join(fmt_int(model.n_groups) for model in models) + " \\\\",
+            " $R^2$ & " + " & ".join(fmt_r2(model.r2) for model in models) + " \\\\",
+            "\\hline",
+            "\\hline \\\\[-1.8ex]",
+            "",
+            "\\end{tabular}",
+            "",
+            "  \\begin{minipage}{0.9\\linewidth}",
+            "      \\footnotesize",
+            "      \\textit{Notes:} The dependent variable is price. Standard errors, clustered at the salon level, are reported in parentheses.",
+            "      The sample is restricted to within-salon male/female matched title cells with identical nongendered service titles and additional descriptive content.",
+            "      Statistical significance is denoted as: $^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01.",
+            "  \\end{minipage}\\end{table}",
+        ]
+    )
+    return "\n".join(lines)
 
 
 def serialize_models(models: list[ModelResult]) -> list[dict[str, object]]:
@@ -430,18 +577,44 @@ def print_parse_summary(stats: dict[str, int]) -> None:
 
 
 def main() -> None:
-    derived_dir = DATA_DIR / "derived"
-    derived_dir.mkdir(parents=True, exist_ok=True)
+    (DATA_DIR / "derived").mkdir(parents=True, exist_ok=True)
+    (DATA_DIR / "audits").mkdir(parents=True, exist_ok=True)
 
     adults = preprocess_adults()
     adults_unisex = restrict_unisex_salons(adults)
     enriched, parse_stats = enrich_adult_baseline(adults_unisex)
+    enriched.to_csv(DATA_DIR / "derived" / "adult_services_matched_enriched.csv", index=False)
     print_parse_summary(parse_stats)
 
     sample_a = apply_sample_a(enriched)
     sample_b = apply_sample_b(sample_a)
     sample_c = apply_sample_c(sample_b)
     primary = primary_sample(sample_c)
+
+    sample_a.to_csv(DATA_DIR / "audits" / "matched_category_sample_a.csv", index=False)
+    sample_b.to_csv(DATA_DIR / "audits" / "matched_category_sample_b.csv", index=False)
+    sample_c.to_csv(DATA_DIR / "audits" / "matched_category_sample_c.csv", index=False)
+    primary.to_csv(DATA_DIR / "audits" / "matched_category_primary_sample.csv", index=False)
+
+    summary_rows = [
+        sample_metrics("current adult analysis sample", adults),
+        sample_metrics("unisex-salon sample", adults_unisex),
+        sample_metrics("sample_a_matched_cells", sample_a, matched=True),
+        sample_metrics("sample_a_exact_pairs", sample_a[sample_a["is_exact_pair_cell"]], matched=True),
+        sample_metrics("sample_b_matched_cells", sample_b, matched=True),
+        sample_metrics("sample_b_exact_pairs", sample_b[sample_b["is_exact_pair_cell"]], matched=True),
+        sample_metrics("sample_c_matched_cells", sample_c, matched=True),
+        sample_metrics("sample_c_exact_pairs", sample_c[sample_c["is_exact_pair_cell"]], matched=True),
+        sample_metrics("primary_regression_sample", primary, matched=True),
+    ]
+    summary = pd.DataFrame(summary_rows)
+    summary.to_csv(DATA_DIR / "derived" / "matched_category_summary.csv", index=False)
+
+    examples = build_examples(enriched, sample_a, sample_b, sample_c, primary)
+    examples.to_csv(DATA_DIR / "audits" / "matched_category_examples.csv", index=False)
+
+    print("\nMatched-category waterfall:")
+    print(summary.to_string(index=False))
 
     primary_listings = len(primary)
     primary_salons = primary["id"].nunique()
@@ -450,10 +623,14 @@ def main() -> None:
 
     if primary_ok or thin_ok:
         models = list(fit_matched_models(primary))
+        tex = render_matched_table(models)
+        write_file(TABLE_OUTPUT, tex)
         MODEL_SUMMARY_OUTPUT.write_text(
             json.dumps({"available": True, "models": serialize_models(models)}, indent=2) + "\n",
             encoding="utf-8",
         )
+        print(f"\nGenerated {TABLE_OUTPUT.relative_to(PAPER_DIR.parent)}")
+        print(tex)
         if not primary_ok:
             print("\nWARNING: primary sample clears the thin threshold only; interpret the matched-category regression cautiously.")
     else:
@@ -472,7 +649,7 @@ def main() -> None:
         print("\nMatched-category primary sample is too small for a stable regression.")
         print(f"- listings: {primary_listings}")
         print(f"- salons: {primary_salons}")
-        print("- no model summary was generated.")
+        print("- diagnostics were written, but no paper table was generated.")
 
 
 if __name__ == "__main__":

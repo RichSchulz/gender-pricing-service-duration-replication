@@ -24,7 +24,7 @@ import pandas as pd
 import reverse_geocoder as rg
 from statsmodels.formula.api import ols
 
-from utils import filter_words, filter_words_kids, ppp_per_usd
+from utils import filter_words, ppp_per_usd
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -34,7 +34,6 @@ TABLES_DIR = PAPER_DIR / "tables"
 MANUSCRIPT_DIR = PAPER_DIR / "manuscript"
 
 ADULT_DATA = DATA_DIR / "snapshots" / "treatwell_without_raw-all-2025-06-02.csv"
-KIDS_DATA = DATA_DIR / "snapshots" / "treatwell_without_raw_kids-2025-06-03.csv"
 VENUE_INFO = DATA_DIR / "snapshots" / "venue_info-2025-11-23.csv"
 MATCHED_MODEL_SUMMARY = DATA_DIR / "derived" / "matched_category_model_summary.json"
 
@@ -82,100 +81,60 @@ MACHINE_KEYWORDS = [
 
 PAPER_TARGETS = {
     "main_1": {
-        "coef": {"Duration (min)": 0.532, "Female": 4.676},
-        "se": {"Duration (min)": 0.007, "Female": 0.149},
-        "obs": 33683,
-        "groups": 13659,
-        "r2": 0.605,
-    },
-    "main_2": {
-        "coef": {"Duration (min)": 0.487, "Female": 2.209, "Duration $\\times$ Female": 0.064},
-        "se": {"Duration (min)": 0.009, "Female": 0.399, "Duration $\\times$ Female": 0.010},
-        "obs": 33683,
-        "groups": 13659,
-        "r2": 0.606,
-    },
-    "main_3": {
-        "coef": {"Duration (min)": 0.541, "Female": 4.557},
-        "se": {"Duration (min)": 0.008, "Female": 0.157},
+        "coef": {"Duration (min)": 0.536, "Female": 4.534},
+        "se": {"Duration (min)": 0.008, "Female": 0.156},
         "obs": 20758,
         "groups": 6459,
-        "r2": 0.623,
+        "r2": 0.621,
     },
-    "main_4": {
-        "coef": {"Duration (min)": 0.465, "Female": 0.663, "Duration $\\times$ Female": 0.103},
+    "main_2": {
+        "coef": {"Duration (min)": 0.462, "Female": 0.741, "Duration $\\times$ Female": 0.100},
         "se": {"Duration (min)": 0.011, "Female": 0.431, "Duration $\\times$ Female": 0.012},
         "obs": 20758,
         "groups": 6459,
-        "r2": 0.627,
+        "r2": 0.625,
     },
     "robust_a_1": {
-        "coef": {"Duration (min)": 0.559, "Female": 4.146},
+        "coef": {"Duration (min)": 0.556, "Female": 4.134},
         "se": {"Duration (min)": 0.016, "Female": 0.282},
         "obs": 6127,
         "groups": 1881,
-        "r2": 0.606,
+        "r2": 0.605,
     },
     "robust_a_2": {
-        "coef": {"Duration (min)": 0.482, "Female": 0.245, "Duration $\\times$ Female": 0.105},
+        "coef": {"Duration (min)": 0.481, "Female": 0.306, "Duration $\\times$ Female": 0.103},
         "se": {"Duration (min)": 0.020, "Female": 0.814, "Duration $\\times$ Female": 0.021},
         "obs": 6127,
         "groups": 1881,
-        "r2": 0.610,
+        "r2": 0.608,
     },
     "robust_b_1": {
-        "coef": {"Duration (min)": 0.423, "Female": 6.805},
-        "se": {"Duration (min)": 0.018, "Female": 0.341},
-        "obs": 6114,
-        "groups": 2235,
-        "r2": 0.600,
+        "coef": {"Duration (min)": 0.437, "Female": 6.496},
+        "se": {"Duration (min)": 0.018, "Female": 0.335},
+        "obs": 7456,
+        "groups": 3680,
+        "r2": 0.594,
     },
     "robust_b_2": {
-        "coef": {"Duration (min)": 0.332, "Female": 1.292, "Duration $\\times$ Female": 0.133},
-        "se": {"Duration (min)": 0.025, "Female": 0.976, "Duration $\\times$ Female": 0.024},
-        "obs": 6114,
-        "groups": 2235,
-        "r2": 0.606,
+        "coef": {"Duration (min)": 0.343, "Female": 1.356, "Duration $\\times$ Female": 0.127},
+        "se": {"Duration (min)": 0.027, "Female": 0.993, "Duration $\\times$ Female": 0.025},
+        "obs": 7456,
+        "groups": 3680,
+        "r2": 0.599,
     },
     "robust_c_1": {
-        "coef": {"Duration (min)": 0.443, "Female": 6.239},
-        "se": {"Duration (min)": 0.012, "Female": 0.268},
-        "obs": 3820,
-        "groups": 1885,
-        "r2": 0.762,
+        "coef": {"Duration (min)": 0.304, "Female": 9.814},
+        "se": {"Duration (min)": 0.031, "Female": 0.626},
+        "obs": 1548,
+        "groups": 725,
+        "r2": 0.681,
     },
     "robust_c_2": {
-        "coef": {"Duration (min)": 0.224, "Female": -1.751, "Duration $\\times$ Female": 0.233},
-        "se": {"Duration (min)": 0.034, "Female": 0.970, "Duration $\\times$ Female": 0.031},
-        "obs": 3820,
-        "groups": 1885,
-        "r2": 0.776,
-    },
-    "kids_1": {
-        "coef": {"Duration (min)": 0.374, "Girl's Cut": 2.176, "Unisex Cut": -0.258},
-        "se": {"Duration (min)": 0.013, "Girl's Cut": 0.159, "Unisex Cut": 0.302},
-        "obs": 6947,
-        "groups": 4030,
-        "r2": 0.414,
-    },
-    "kids_2": {
-        "coef": {
-            "Duration (min)": 0.322,
-            "Girl's Cut": 0.028,
-            "Unisex Cut": -1.659,
-            "Duration $\\times$ Girl": 0.070,
-            "Duration $\\times$ Unisex": 0.048,
-        },
-        "se": {
-            "Duration (min)": 0.025,
-            "Girl's Cut": 0.615,
-            "Unisex Cut": 0.842,
-            "Duration $\\times$ Girl": 0.021,
-            "Duration $\\times$ Unisex": 0.030,
-        },
-        "obs": 6947,
-        "groups": 4030,
-        "r2": 0.416,
+        "coef": {"Duration (min)": 0.122, "Female": -0.632, "Duration $\\times$ Female": 0.252},
+        "se": {"Duration (min)": 0.040, "Female": 1.452, "Duration $\\times$ Female": 0.035},
+        "obs": 1548,
+        "groups": 725,
+        "r2": 0.701,
     },
 }
 
@@ -235,6 +194,17 @@ class FrozenModelResult:
         return self.r2_value
 
 
+@dataclass
+class SameDurationGap:
+    label: str
+    gap: float
+    se: float
+    pvalue: float
+    listings: int
+    salons: int
+    cells: int
+
+
 def normalize(text: object) -> str:
     if not isinstance(text, str):
         return ""
@@ -244,7 +214,6 @@ def normalize(text: object) -> str:
 
 
 FILTER_WORDS = list({normalize(word) for word in filter_words})
-FILTER_WORDS_KIDS = list({normalize(word) for word in filter_words_kids})
 WET_KEYWORDS = [normalize(word) for word in WET_CUT_KEYWORDS]
 MACHINE_KEYWORDS_N = [normalize(word) for word in MACHINE_KEYWORDS]
 
@@ -282,28 +251,6 @@ def preprocess_adults() -> pd.DataFrame:
     ].copy()
     df = df[(df["is_male"] == True) | (df["is_female"] == True)].copy()
     df["female"] = df["is_female"].astype(int)
-    return df.reset_index(drop=True)
-
-
-def preprocess_kids() -> pd.DataFrame:
-    df = pd.read_csv(KIDS_DATA, low_memory=False)
-    df["country"] = load_country_codes(df)
-    df["duration"] = (df["simpleCutDurationMin"] + df["simpleCutDurationMax"]) / 2
-    df = df[(df["duration"] > 10) & (df["duration"] < 120)].copy()
-    df = df[~df["country"].isin(["LU", "SM"])].copy()
-    df = df[df["simpleCutSalePrice"] < 200].copy()
-    df = df[df["name"] != "Test Salon TEST PURPOSE'S ONLY"].copy()
-    df["price"] = df.apply(convert_price_to_eur, axis=1)
-    df = df[
-        df["simpleCutName"].apply(
-            lambda value: not any(word in normalize(value) for word in FILTER_WORDS_KIDS)
-        )
-    ].copy()
-    df = df[
-        (df["is_boys"] == True) | (df["is_girls"] == True) | (df["is_unisex"] == True)
-    ].copy()
-    df["girl"] = df["is_girls"].astype(int)
-    df["unisex"] = df["is_unisex"].astype(int)
     return df.reset_index(drop=True)
 
 
@@ -349,39 +296,6 @@ def fit_adult_models(df: pd.DataFrame) -> tuple[ModelResult, ModelResult]:
     return m1, m2
 
 
-def fit_kids_models(df: pd.DataFrame) -> tuple[ModelResult, ModelResult]:
-    work = df.copy()
-    work["girl_dur"] = work["girl"] * work["duration"]
-    work["unisex_dur"] = work["unisex"] * work["duration"]
-    work = add_demeaned_columns(
-        work,
-        ["price", "girl", "unisex", "duration", "girl_dur", "unisex_dur"],
-    )
-    m1 = fit_clustered_fe(
-        "price_dm ~ girl_dm + unisex_dm + duration_dm - 1",
-        work,
-        label="Fixed Effects",
-        coef_map={
-            "Duration (min)": "duration_dm",
-            "Girl's Cut": "girl_dm",
-            "Unisex Cut": "unisex_dm",
-        },
-    )
-    m2 = fit_clustered_fe(
-        "price_dm ~ girl_dm + unisex_dm + duration_dm + girl_dur_dm + unisex_dur_dm - 1",
-        work,
-        label="FE w/ Interaction",
-        coef_map={
-            "Duration (min)": "duration_dm",
-            "Girl's Cut": "girl_dm",
-            "Unisex Cut": "unisex_dm",
-            "Duration $\\times$ Girl": "girl_dur_dm",
-            "Duration $\\times$ Unisex": "unisex_dur_dm",
-        },
-    )
-    return m1, m2
-
-
 def restrict_unisex_salons(df: pd.DataFrame) -> pd.DataFrame:
     female_ids = set(df.loc[df["female"] == 1, "id"])
     male_ids = set(df.loc[df["female"] == 0, "id"])
@@ -403,6 +317,35 @@ def restrict_wet_cuts(df: pd.DataFrame) -> pd.DataFrame:
         lambda value: contains_any_keyword(value, MACHINE_KEYWORDS_N)
     )
     return work[work["is_wet_name"] & ~work["is_machine_name"]].copy()
+
+
+def fit_same_duration_gap(df: pd.DataFrame, label: str) -> SameDurationGap:
+    grouped = (
+        df.groupby(["id", "duration", "female"], observed=True)
+        .agg(mean_price=("price", "mean"), listings=("price", "size"))
+        .reset_index()
+    )
+    male = grouped[grouped["female"] == 0].drop(columns=["female"])
+    female = grouped[grouped["female"] == 1].drop(columns=["female"])
+    overlap_cells = male.merge(female, on=["id", "duration"], suffixes=("_male", "_female"))
+    overlap_keys = overlap_cells[["id", "duration"]].drop_duplicates()
+    work = df.merge(overlap_keys, on=["id", "duration"], how="inner", validate="many_to_one")
+    cell_means = work.groupby(["id", "duration"], observed=True)[["price", "female"]].transform("mean")
+    work["price_cell_dm"] = work["price"] - cell_means["price"]
+    work["female_cell_dm"] = work["female"] - cell_means["female"]
+    model = ols("price_cell_dm ~ female_cell_dm - 1", data=work).fit(
+        cov_type="cluster",
+        cov_kwds={"groups": work["id"]},
+    )
+    return SameDurationGap(
+        label=label,
+        gap=float(model.params["female_cell_dm"]),
+        se=float(model.bse["female_cell_dm"]),
+        pvalue=float(model.pvalues["female_cell_dm"]),
+        listings=int(len(work)),
+        salons=int(work["id"].nunique()),
+        cells=int(len(overlap_cells)),
+    )
 
 
 def stars(pvalue: float | None) -> str:
@@ -429,6 +372,18 @@ def fmt_se(value: float | None) -> str:
     return f"({value:.3f})"
 
 
+def fmt_eur_coef(value: float | None, pvalue: float | None) -> str:
+    if value is None:
+        return ""
+    return f"{value:.1f}{stars(pvalue)}"
+
+
+def fmt_eur_se(value: float | None) -> str:
+    if value is None:
+        return ""
+    return f"({value:.1f})"
+
+
 def fmt_int(value: int) -> str:
     return str(int(value))
 
@@ -453,118 +408,12 @@ def render_main_table(models: list[ModelResult]) -> str:
         "  \\label{tab:main_results}",
         "  \\small",
         "  ",
-        "\\begin{tabular}{@{\\extracolsep{5pt}}lcccc}",
-        "\\\\[-1.8ex]\\hline",
-        "\\hline \\\\[-1.8ex]",
-        "& \\multicolumn{4}{c}{\\textit{Dependent variable: price}} \\\\",
-        "\\cr \\cline{2-5}",
-        "\\\\[-1.8ex] & \\multicolumn{2}{c}{All Salons} & \\multicolumn{2}{c}{Unisex Salons Only}  \\\\",
-        "\\\\[-1.8ex] & (1) & (2) & (3) & (4) \\\\",
-        "\\hline \\\\[-1.8ex]",
-    ]
-    for row in rows:
-        coef_cells = [fmt_coef(model.coef(row), model.pvalue(row)) for model in models]
-        se_cells = [fmt_se(model.se(row)) for model in models]
-        lines.append(f" {row} & " + " & ".join(coef_cells) + " \\\\")
-        lines.append("& " + " & ".join(se_cells) + " \\\\")
-    lines.extend(
-        [
-            "\\hline \\\\[-1.8ex]",
-            " Salon Fixed Effects & Yes & Yes & Yes & Yes \\\\",
-            " Observations & " + " & ".join(fmt_int(model.nobs) for model in models) + " \\\\",
-            " Number of salons & " + " & ".join(fmt_int(model.n_groups) for model in models) + " \\\\",
-            " $R^2$ & " + " & ".join(fmt_r2(model.r2) for model in models) + " \\\\",
-            "\\hline",
-            "\\hline \\\\[-1.8ex]",
-            "",
-            "\\end{tabular}",
-            "",
-            "  \\begin{minipage}{0.9\\linewidth}",
-            "      \\footnotesize",
-            "      \\textit{Notes:} The dependent variable is price. Standard errors, clustered at the salon level, are reported in parentheses.",
-            "      Columns (1)-(2) present results for the full sample of salons. Columns (3)-(4) are restricted to unisex salons that offer services to both men and women.",
-            "      Statistical significance is denoted as: $^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01.",
-            "  \\end{minipage}\\end{table}",
-        ]
-    )
-    return "\n".join(lines)
-
-
-def render_robustness_table(
-    robust_a: list[ModelResult],
-    robust_b: list[ModelResult],
-    robust_c: list[ModelResult | FrozenModelResult],
-) -> str:
-    rows = ["Duration (min)", "Female", "Duration $\\times$ Female"]
-    all_models = [*robust_a, *robust_b, *robust_c]
-    lines = [
-        "",
-        "\\begin{table}[htbp]",
-        "  \\centering",
-        "  \\caption{Robustness Checks}",
-        "  \\label{tab:combined_robustness_results}",
-        "  \\small",
-        "",
-        "\\begin{tabular}{@{\\extracolsep{4pt}}lcccccc}",
-        "\\\\[-1.8ex]\\hline",
-        "\\hline \\\\[-1.8ex]",
-        "& \\multicolumn{6}{c}{\\textit{Dependent variable: price}} \\\\",
-        "\\cr \\cline{2-7}",
-        "\\\\[-1.8ex] & \\multicolumn{2}{c}{Single Employee} & \\multicolumn{2}{c}{Wet Cuts} & \\multicolumn{2}{c}{Matched Titles} \\\\",
-        "\\\\[-1.8ex] & (1) & (2) & (3) & (4) & (5) & (6) \\\\",
-        "\\hline \\\\[-1.8ex]",
-    ]
-    for row in rows:
-        coef_cells = [fmt_coef(model.coef(row), model.pvalue(row)) for model in all_models]
-        se_cells = [fmt_se(model.se(row)) for model in all_models]
-        lines.append(f" {row} & " + " & ".join(coef_cells) + " \\\\")
-        lines.append("& " + " & ".join(se_cells) + " \\\\")
-    lines.extend(
-        [
-            "\\hline \\\\[-1.8ex]",
-            " Salon Fixed Effects & Yes & Yes & Yes & Yes & Yes & Yes \\\\",
-            " Observations & " + " & ".join(fmt_int(model.nobs) for model in all_models) + " \\\\",
-            " Number of salons & " + " & ".join(fmt_int(model.n_groups) for model in all_models) + " \\\\",
-            " $R^2$ & " + " & ".join(fmt_r2(model.r2) for model in all_models) + " \\\\",
-            "\\hline",
-            "\\hline \\\\[-1.8ex]",
-            "",
-            "\\end{tabular}",
-            "",
-            "  \\begin{minipage}{0.96\\linewidth}",
-            "      \\footnotesize",
-            "      \\textit{Notes:} The dependent variable is price. Standard errors, clustered at the salon level, are reported in parentheses.",
-            "      Columns (1)-(2) restrict the sample to owner-operated or single-employee salons that offer services to both men and women, thereby holding the service provider constant within salon.",
-            "      Columns (3)-(4) restrict the sample to wet-cut services from unisex salons.",
-            "      Columns (5)-(6) restrict the sample to within-salon male/female listings with identical nongendered service titles and additional descriptive content.",
-            "      Statistical significance is denoted as: $^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01.",
-            "  \\end{minipage}\\end{table}",
-        ]
-    )
-    return "\n".join(lines)
-
-
-def render_children_table(models: list[ModelResult]) -> str:
-    rows = [
-        "Duration (min)",
-        "Girl's Cut",
-        "Unisex Cut",
-        "Duration $\\times$ Girl",
-        "Duration $\\times$ Unisex",
-    ]
-    lines = [
-        "",
-        "\\begin{table}[htbp]",
-        "  \\centering",
-        "  \\caption{Children's Haircuts: Posted Price--Duration Schedule Differences}",
-        "  \\label{tab:kids_main}",
-        "  \\small",
-        "  ",
         "\\begin{tabular}{@{\\extracolsep{5pt}}lcc}",
         "\\\\[-1.8ex]\\hline",
         "\\hline \\\\[-1.8ex]",
         "& \\multicolumn{2}{c}{\\textit{Dependent variable: price}} \\\\",
         "\\cr \\cline{2-3}",
+        "\\\\[-1.8ex] & \\multicolumn{2}{c}{Unisex Salons Only}  \\\\",
         "\\\\[-1.8ex] & (1) & (2) \\\\",
         "\\hline \\\\[-1.8ex]",
     ]
@@ -585,13 +434,69 @@ def render_children_table(models: list[ModelResult]) -> str:
             "",
             "\\end{tabular}",
             "",
-            "\\begin{minipage}{0.9\\linewidth}",
-            "    \\footnotesize",
-            "    \\textit{Notes:} The dependent variable is price. Standard errors, clustered at the salon level, are reported in parentheses.",
-            "    The reference category for gender is Boys' Cuts.",
-            "    Statistical significance is denoted as: $^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01.",
-            "\\end{minipage}",
-            "\\end{table}",
+            "  \\begin{minipage}{0.9\\linewidth}",
+            "      \\footnotesize",
+            "      \\textit{Notes:} The dependent variable is price. Standard errors, clustered at the salon level, are reported in parentheses.",
+            "      The sample is restricted to unisex salons that offer services to both men and women.",
+            "      Column (1) excludes the interaction; Column (2) includes it.",
+            "      Statistical significance is denoted as: $^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01.",
+            "  \\end{minipage}\\end{table}",
+        ]
+    )
+    return "\n".join(lines)
+
+
+def render_robustness_table(
+    robust_a: list[ModelResult],
+    robust_b: list[ModelResult],
+    robust_c: list[ModelResult | FrozenModelResult],
+    same_duration_checks: list[SameDurationGap],
+) -> str:
+    interaction_row = "Duration $\\times$ Female"
+    same_by_label = {item.label: item for item in same_duration_checks}
+    rows = [
+        ("Single employee", same_by_label["Single employee"], robust_a[1]),
+        ("Wet cuts", same_by_label["Wet cuts"], robust_b[1]),
+        ("Matched titles", same_by_label["Matched titles"], robust_c[1]),
+    ]
+    lines = [
+        "",
+        "\\begin{table}[htbp]",
+        "  \\centering",
+        "  \\caption{Supplementary Same-Duration and Continuous Checks}",
+        "  \\label{tab:combined_robustness_results}",
+        "  \\footnotesize",
+        "",
+        "\\begin{tabular}{lcccc}",
+        "\\hline",
+        "Sample restriction & Same-duration gap & \\makecell{Exact-overlap\\\\listings/salons} & Duration $\\times$ Female & \\makecell{Continuous\\\\listings/salons} \\\\",
+        "\\hline",
+    ]
+    for label, same_duration, model in rows:
+        exact_gap = f"{fmt_eur_coef(same_duration.gap, same_duration.pvalue)} {fmt_eur_se(same_duration.se)}"
+        interaction = (
+            f"{fmt_coef(model.coef(interaction_row), model.pvalue(interaction_row))} "
+            f"{fmt_se(model.se(interaction_row))}"
+        )
+        lines.append(
+            f"{label} & {exact_gap} & "
+            f"{fmt_int(same_duration.listings)}/{fmt_int(same_duration.salons)} & "
+            f"{interaction} & "
+            f"{fmt_int(model.nobs)}/{fmt_int(model.n_groups)} \\\\"
+        )
+    lines.extend(
+        [
+            "\\hline",
+            "\\end{tabular}",
+            "",
+            "  \\begin{minipage}{0.96\\linewidth}",
+            "      \\footnotesize",
+            "      \\textit{Notes:} Same-duration gaps use salon-by-exact-duration fixed effects and are identified by salon-duration cells containing both male- and female-coded listings.",
+            "      The continuous-interaction column estimates the Table~\\ref{tab:main_results} interaction specification with salon fixed effects.",
+            "      Standard errors are clustered at the salon level and reported in parentheses.",
+            "      The single-employee and wet-cut rows use adult unisex salons; the matched-title row uses within-salon male/female listings with identical nongendered service titles and additional descriptive content.",
+            "      Statistical significance is denoted as: $^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01.",
+            "  \\end{minipage}\\end{table}",
         ]
     )
     return "\n".join(lines)
@@ -601,7 +506,7 @@ def render_country_heterogeneity_table(rows: list[dict[str, object]]) -> str:
     lines = [
         "\\begin{table}[htbp]",
         "  \\centering",
-        "  \\caption{Country-Specific Unisex-Salon Slope Estimates}",
+        "  \\caption{Country-Specific Continuous-Interaction Estimates}",
         "  \\label{tab:country_heterogeneity}",
         "  \\small",
         "  ",
@@ -658,21 +563,16 @@ def compare_all_tables(
     robust_a: list[ModelResult],
     robust_b: list[ModelResult],
     robust_c: list[ModelResult | FrozenModelResult],
-    kids_models: list[ModelResult],
 ) -> list[str]:
     checks = [
         ("main_1", main_models[0]),
         ("main_2", main_models[1]),
-        ("main_3", main_models[2]),
-        ("main_4", main_models[3]),
         ("robust_a_1", robust_a[0]),
         ("robust_a_2", robust_a[1]),
         ("robust_b_1", robust_b[0]),
         ("robust_b_2", robust_b[1]),
         ("robust_c_1", robust_c[0]),
         ("robust_c_2", robust_c[1]),
-        ("kids_1", kids_models[0]),
-        ("kids_2", kids_models[1]),
     ]
     mismatches: list[str] = []
     for key, model in checks:
@@ -683,7 +583,6 @@ def compare_all_tables(
 def print_spec_summary() -> None:
     summary = {
         "adult_data": str(ADULT_DATA.relative_to(ROOT)),
-        "children_data": str(KIDS_DATA.relative_to(ROOT)),
         "single_employee_data": str(VENUE_INFO.relative_to(ROOT)),
         "adult_sample_restrictions": [
             "duration > 10 and < 120",
@@ -693,14 +592,6 @@ def print_spec_summary() -> None:
             "drop names containing adult/non-cut keyword filters from analysis/utils.py",
             "keep rows flagged male or female",
         ],
-        "children_sample_restrictions": [
-            "duration > 10 and < 120",
-            "exclude LU and SM from reverse-geocoded country",
-            "simpleCutSalePrice < 200",
-            "drop Test Salon TEST PURPOSE'S ONLY",
-            "drop names containing kids keyword filters from analysis/utils.py",
-            "keep rows flagged boys, girls, or unisex",
-        ],
         "robustness_panel_a": "adult unisex sample merged to data/snapshots/venue_info-2025-11-23.csv with employee_count <= 1",
         "robustness_panel_b": "adult unisex sample restricted to names containing wet-cut keywords and excluding machine-keyword names",
     }
@@ -709,7 +600,6 @@ def print_spec_summary() -> None:
 
 
 def write_file(path: Path, content: str) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(content + "\n", encoding="utf-8")
 
 
@@ -774,9 +664,8 @@ def main() -> None:
 
     adults = preprocess_adults()
     adults_unisex = restrict_unisex_salons(adults)
-    kids = preprocess_kids()
 
-    main_models = [*fit_adult_models(adults), *fit_adult_models(adults_unisex)]
+    main_models = list(fit_adult_models(adults_unisex))
 
     single_employee = restrict_single_employee(adults_unisex)
     robust_a = list(fit_adult_models(single_employee))
@@ -784,30 +673,31 @@ def main() -> None:
     wet_cuts = restrict_wet_cuts(adults_unisex)
     robust_b = list(fit_adult_models(wet_cuts))
     robust_c = refresh_matched_category_models()
+    matched_titles = pd.read_csv(DATA_DIR / "audits" / "matched_category_primary_sample.csv")
+    same_duration_checks = [
+        fit_same_duration_gap(single_employee, "Single employee"),
+        fit_same_duration_gap(wet_cuts, "Wet cuts"),
+        fit_same_duration_gap(matched_titles, "Matched titles"),
+    ]
 
-    kids_models = list(fit_kids_models(kids))
     country_rows = fit_country_rows(adults_unisex)
 
     main_tex = render_main_table(main_models)
-    robustness_tex = render_robustness_table(robust_a, robust_b, robust_c)
-    children_tex = render_children_table(kids_models)
+    robustness_tex = render_robustness_table(robust_a, robust_b, robust_c, same_duration_checks)
     country_tex = render_country_heterogeneity_table(country_rows)
 
     write_file(TABLES_DIR / "table_main_results.tex", main_tex)
     write_file(TABLES_DIR / "table_robustness.tex", robustness_tex)
-    write_file(TABLES_DIR / "table_children.tex", children_tex)
     write_file(TABLES_DIR / "table_country_heterogeneity.tex", country_tex)
 
     print("\n=== Generated paper/tables/table_main_results.tex ===")
     print(main_tex)
     print("\n=== Generated paper/tables/table_robustness.tex ===")
     print(robustness_tex)
-    print("\n=== Generated paper/tables/table_children.tex ===")
-    print(children_tex)
     print("\n=== Generated paper/tables/table_country_heterogeneity.tex ===")
     print(country_tex)
 
-    mismatches = compare_all_tables(main_models, robust_a, robust_b, robust_c, kids_models)
+    mismatches = compare_all_tables(main_models, robust_a, robust_b, robust_c)
     print("\n=== Comparison Against Current Paper Values ===")
     if not mismatches:
         print("Generated values match the current manuscript tables exactly.")
@@ -815,10 +705,9 @@ def main() -> None:
         for item in mismatches:
             print(f"- {item}")
 
-    print("\nTable files written for downstream paper use:")
+    print("\nReplication-package outputs updated:")
     print("- paper/tables/table_main_results.tex")
     print("- paper/tables/table_robustness.tex")
-    print("- paper/tables/table_children.tex")
     print("- paper/tables/table_country_heterogeneity.tex")
 
 

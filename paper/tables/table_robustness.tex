@@ -1,39 +1,25 @@
 
 \begin{table}[htbp]
   \centering
-  \caption{Robustness Checks}
+  \caption{Supplementary Same-Duration and Continuous Checks}
   \label{tab:combined_robustness_results}
-  \small
+  \footnotesize
 
-\begin{tabular}{@{\extracolsep{4pt}}lcccccc}
-\\[-1.8ex]\hline
-\hline \\[-1.8ex]
-& \multicolumn{6}{c}{\textit{Dependent variable: price}} \\
-\cr \cline{2-7}
-\\[-1.8ex] & \multicolumn{2}{c}{Single Employee} & \multicolumn{2}{c}{Wet Cuts} & \multicolumn{2}{c}{Matched Titles} \\
-\\[-1.8ex] & (1) & (2) & (3) & (4) & (5) & (6) \\
-\hline \\[-1.8ex]
- Duration (min) & 0.556$^{***}$ & 0.481$^{***}$ & 0.437$^{***}$ & 0.343$^{***}$ & 0.304$^{***}$ & 0.122$^{***}$ \\
-& (0.016) & (0.020) & (0.018) & (0.027) & (0.031) & (0.040) \\
- Female & 4.134$^{***}$ & 0.306$^{}$ & 6.496$^{***}$ & 1.356$^{}$ & 9.814$^{***}$ & -0.632$^{}$ \\
-& (0.282) & (0.814) & (0.335) & (0.993) & (0.626) & (1.452) \\
- Duration $\times$ Female &  & 0.103$^{***}$ &  & 0.127$^{***}$ &  & 0.252$^{***}$ \\
-&  & (0.021) &  & (0.025) &  & (0.035) \\
-\hline \\[-1.8ex]
- Salon Fixed Effects & Yes & Yes & Yes & Yes & Yes & Yes \\
- Observations & 6127 & 6127 & 7456 & 7456 & 1548 & 1548 \\
- Number of salons & 1881 & 1881 & 3680 & 3680 & 725 & 725 \\
- $R^2$ & 0.605 & 0.608 & 0.594 & 0.599 & 0.681 & 0.701 \\
+\begin{tabular}{lcccc}
 \hline
-\hline \\[-1.8ex]
-
+Sample restriction & Same-duration gap & \makecell{Exact-overlap\\listings/salons} & Duration $\times$ Female & \makecell{Continuous\\listings/salons} \\
+\hline
+Single employee & 5.5$^{***}$ (0.4) & 1802/676 & 0.103$^{***}$ (0.021) & 6127/1881 \\
+Wet cuts & 8.7$^{***}$ (0.5) & 1060/428 & 0.127$^{***}$ (0.025) & 7456/3680 \\
+Matched titles & 10.0$^{***}$ (0.9) & 282/129 & 0.252$^{***}$ (0.035) & 1548/725 \\
+\hline
 \end{tabular}
 
   \begin{minipage}{0.96\linewidth}
       \footnotesize
-      \textit{Notes:} The dependent variable is price. Standard errors, clustered at the salon level, are reported in parentheses.
-      Columns (1)-(2) restrict the sample to owner-operated or single-employee salons that offer services to both men and women, thereby holding the service provider constant within salon.
-      Columns (3)-(4) restrict the sample to wet-cut services from unisex salons.
-      Columns (5)-(6) restrict the sample to within-salon male/female listings with identical nongendered service titles and additional descriptive content.
+      \textit{Notes:} Same-duration gaps use salon-by-exact-duration fixed effects and are identified by salon-duration cells containing both male- and female-coded listings.
+      The continuous-interaction column estimates the Table~\ref{tab:main_results} interaction specification with salon fixed effects.
+      Standard errors are clustered at the salon level and reported in parentheses.
+      The single-employee and wet-cut rows use adult unisex salons; the matched-title row uses within-salon male/female listings with identical nongendered service titles and additional descriptive content.
       Statistical significance is denoted as: $^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01.
   \end{minipage}\end{table}

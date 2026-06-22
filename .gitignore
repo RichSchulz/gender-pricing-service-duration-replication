@@ -27,7 +27,9 @@ env/
 
 # Data outputs
 data/**/*.csv
+data/**/*.json
 !data/README.md
+!data/audits/README.md
 !data/snapshots/README.md
 !data/derived/README.md
 !data/final/README.md

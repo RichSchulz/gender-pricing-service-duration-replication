@@ -1,0 +1,37 @@
+
+\begin{table}[htbp]
+  \centering
+  \caption{Matched-Category Robustness Check}
+  \label{tab:matched_category_robustness}
+  \small
+
+\begin{tabular}{@{\extracolsep{5pt}}lcc}
+\\[-1.8ex]\hline
+\hline \\[-1.8ex]
+& \multicolumn{2}{c}{\textit{Dependent variable: price}} \\
+\cr \cline{2-3}
+\\[-1.8ex] & \multicolumn{1}{c}{Matched Category FE (No Interaction)} & \multicolumn{1}{c}{Matched Category FE (w/ Interaction)}  \\
+\\[-1.8ex] & (1) & (2) \\
+\hline \\[-1.8ex]
+ Duration (min) & 0.304$^{***}$ & 0.122$^{***}$ \\
+& (0.031) & (0.040) \\
+ Female & 9.814$^{***}$ & -0.632$^{}$ \\
+& (0.626) & (1.452) \\
+ Duration $\times$ Female &  & 0.252$^{***}$ \\
+&  & (0.035) \\
+\hline \\[-1.8ex]
+ Salon Fixed Effects & Yes & Yes \\
+ Observations & 1548 & 1548 \\
+ Number of salons & 725 & 725 \\
+ $R^2$ & 0.681 & 0.701 \\
+\hline
+\hline \\[-1.8ex]
+
+\end{tabular}
+
+  \begin{minipage}{0.9\linewidth}
+      \footnotesize
+      \textit{Notes:} The dependent variable is price. Standard errors, clustered at the salon level, are reported in parentheses.
+      The sample is restricted to within-salon male/female matched title cells with identical nongendered service titles and additional descriptive content.
+      Statistical significance is denoted as: $^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01.
+  \end{minipage}\end{table}

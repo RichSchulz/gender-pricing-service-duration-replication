@@ -5,25 +5,25 @@
   \label{tab:main_results}
   \small
   
-\begin{tabular}{@{\extracolsep{5pt}}lcccc}
+\begin{tabular}{@{\extracolsep{5pt}}lcc}
 \\[-1.8ex]\hline
 \hline \\[-1.8ex]
-& \multicolumn{4}{c}{\textit{Dependent variable: price}} \\
-\cr \cline{2-5}
-\\[-1.8ex] & \multicolumn{2}{c}{All Salons} & \multicolumn{2}{c}{Unisex Salons Only}  \\
-\\[-1.8ex] & (1) & (2) & (3) & (4) \\
+& \multicolumn{2}{c}{\textit{Dependent variable: price}} \\
+\cr \cline{2-3}
+\\[-1.8ex] & \multicolumn{2}{c}{Unisex Salons Only}  \\
+\\[-1.8ex] & (1) & (2) \\
 \hline \\[-1.8ex]
- Duration (min) & 0.528$^{***}$ & 0.485$^{***}$ & 0.536$^{***}$ & 0.462$^{***}$ \\
-& (0.007) & (0.009) & (0.008) & (0.011) \\
- Female & 4.648$^{***}$ & 2.295$^{***}$ & 4.534$^{***}$ & 0.741$^{*}$ \\
-& (0.149) & (0.398) & (0.156) & (0.431) \\
- Duration $\times$ Female &  & 0.061$^{***}$ &  & 0.100$^{***}$ \\
-&  & (0.010) &  & (0.012) \\
+ Duration (min) & 0.536$^{***}$ & 0.462$^{***}$ \\
+& (0.008) & (0.011) \\
+ Female & 4.534$^{***}$ & 0.741$^{*}$ \\
+& (0.156) & (0.431) \\
+ Duration $\times$ Female &  & 0.100$^{***}$ \\
+&  & (0.012) \\
 \hline \\[-1.8ex]
- Salon Fixed Effects & Yes & Yes & Yes & Yes \\
- Observations & 33682 & 33682 & 20758 & 20758 \\
- Number of salons & 13658 & 13658 & 6459 & 6459 \\
- $R^2$ & 0.603 & 0.605 & 0.621 & 0.625 \\
+ Salon Fixed Effects & Yes & Yes \\
+ Observations & 20758 & 20758 \\
+ Number of salons & 6459 & 6459 \\
+ $R^2$ & 0.621 & 0.625 \\
 \hline
 \hline \\[-1.8ex]
 
@@ -32,6 +32,7 @@
   \begin{minipage}{0.9\linewidth}
       \footnotesize
       \textit{Notes:} The dependent variable is price. Standard errors, clustered at the salon level, are reported in parentheses.
-      Columns (1)-(2) present results for the full sample of salons. Columns (3)-(4) are restricted to unisex salons that offer services to both men and women.
+      The sample is restricted to unisex salons that offer services to both men and women.
+      Column (1) excludes the interaction; Column (2) includes it.
       Statistical significance is denoted as: $^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01.
   \end{minipage}\end{table}
