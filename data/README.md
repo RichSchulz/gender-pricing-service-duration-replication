@@ -1,6 +1,6 @@
 # Data Directory
 
-This replication package does not ship Treatwell data. Generate all files locally.
+This replication package does not ship Treatwell data. Exact reproduction requires access to the original historical inputs listed below. A fresh scrape collects current listings and cannot recreate the historical sample.
 
 ## Directory Layout
 
@@ -9,13 +9,14 @@ This replication package does not ship Treatwell data. Generate all files locall
 - `data/audits/`: regenerated audit samples and inspection outputs used by robustness diagnostics.
 - `data/final/`: reserved for curated, reproducibility-critical local inputs if needed later.
 
-## Expected Snapshot Files
+## Required Historical Snapshot Files
 
-- `treatwell-all-{date}.csv`
-- `treatwell_without_raw-all-{date}.csv`
-- `treatwell_kids-{date}.csv`
-- `treatwell_without_raw_kids-{date}.csv`
-- `venue_info-{date}.csv`
+- `snapshots/treatwell_without_raw-all-2025-06-02.csv`: adult listings.
+- `snapshots/treatwell-all-2025-06-02.csv`: raw adult listings used for matched-title enrichment.
+- `snapshots/treatwell_without_raw_kids-2025-06-03.csv`: children's listings.
+- `snapshots/venue_info-2025-11-23.csv`: venue metadata used for the single-employee restriction.
+
+The analysis scripts read these exact filenames. Do not substitute fresh extracts under the historical names. For a new sample, update the script input paths to point to its own dated files. See the root README for collection and replication instructions.
 
 ## Expected Derived Files
 

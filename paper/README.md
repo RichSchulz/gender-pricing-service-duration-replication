@@ -4,6 +4,10 @@ This directory only keeps lightweight paper-facing artifacts that are safe to re
 
 ## Included
 
+- `paper/manuscript.pdf`: final submission PDF.
+- `paper/manuscript.tex`: final submission LaTeX source, with all manuscript tables embedded.
+- `paper/references.bib`: manuscript bibliography.
+- `paper/figure_duration_distribution_by_gender.jpeg`: figure used by the manuscript source.
 - `paper/tables/table_main_results.tex`
 - `paper/tables/table_robustness.tex`
 - `paper/tables/table_country_heterogeneity.tex`
@@ -18,14 +22,28 @@ This directory only keeps lightweight paper-facing artifacts that are safe to re
 
 ## Excluded
 
-- manuscript drafts
-- submission files
+- superseded manuscript drafts and submission bundles
 - internal review artifacts
-- generated PDFs
+- intermediate LaTeX build files
 
-Rebuild the main tables with:
+## Build The Manuscript
+
+From the repository root:
+
+```bash
+cd paper
+latexmk -pdf -interaction=nonstopmode -halt-on-error manuscript.tex
+```
+
+The manuscript files were copied from the final submission. The PNG in `paper/figures/` is the analysis-generated figure; the manuscript uses the JPEG included alongside its source.
+
+## Rebuild Analysis Outputs
+
+From the repository root, with the historical inputs described in `data/README.md`:
 
 ```bash
 python analysis/duration_overlap_analysis.py
 python analysis/generate_paper_tables.py
 ```
+
+These commands regenerate the separate table files and the PNG figure. They do not modify the tables embedded in `paper/manuscript.tex`.

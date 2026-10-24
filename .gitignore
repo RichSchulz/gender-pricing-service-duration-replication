@@ -46,3 +46,4 @@ data/**/*.json
 *.bbl
 *.zip
 *.pdf
+!paper/manuscript.pdf

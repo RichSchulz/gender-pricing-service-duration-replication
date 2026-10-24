@@ -1,1 +1,1 @@
-Locally generated scraper outputs belong here. Do not commit Treatwell snapshot CSV files.
+Original historical inputs and locally generated scraper outputs belong here. The analysis requires the specific June 2025 listing files and November 2025 venue metadata listed in `data/README.md`. Fresh collection produces new dated files and does not recreate those snapshots. Do not commit Treatwell snapshot CSV files.
